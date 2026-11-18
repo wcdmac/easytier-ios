@@ -62,7 +62,7 @@ struct ACLSettingsView: View {
                     NavigationLink {
                         ACLGroupEditorView(acl: aclBinding)
                     } label: {
-                        LabeledContent {
+                        LabeledContentCompat {
                             Text("\(groupNames.count)")
                                 .foregroundStyle(.secondary)
                         } label: {
@@ -203,8 +203,8 @@ private struct ACLChainEditorView: View {
             }
 
             Section("acl.chain_description") {
-                TextField("acl.chain_description_placeholder", text: $chain.description, axis: .vertical)
-                    .lineLimit(2...4)
+                AdaptiveTextField("acl.chain_description_placeholder", text: $chain.description, axis: .vertical)
+                    .lineLimit(4)
             }
 
             Section {
@@ -351,8 +351,8 @@ private struct ACLRuleEditorView: View {
             }
 
             Section("acl.rule_description") {
-                TextField("acl.rule_description_placeholder", text: $rule.description, axis: .vertical)
-                    .lineLimit(2...4)
+                AdaptiveTextField("acl.rule_description_placeholder", text: $rule.description, axis: .vertical)
+                    .lineLimit(4)
             }
 
             ACLStringListEditor(

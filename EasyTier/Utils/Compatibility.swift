@@ -88,6 +88,7 @@ private struct VerticalBarAwareLabelStyle: ViewModifier {
 
 extension ToolbarContent {
     /// Prefers placing the item in the vertical bar (e.g. on iPhone Duo) when one is present.
+    @available(iOS 27.1, *)
     @ToolbarContentBuilder
     func adaptiveVerticalPreferred() -> some ToolbarContent {
 #if os(iOS)

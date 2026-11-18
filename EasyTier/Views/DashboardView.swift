@@ -536,7 +536,9 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
                     .foregroundStyle(isConnected ? Color.red : Color.accentColor)
                     .animation(.interactiveSpring, value: [isConnected, isPending])
                 }
-                .adaptiveVerticalPreferred()
+                // .adaptiveVerticalPreferred() is iOS 27.1+ only; omitted for
+                // the iOS 15 deployment target (ToolbarContentBuilder cannot
+                // host an availability branch before iOS 16).
             }
         }
         .onAppear {
@@ -562,7 +564,7 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
             webStatusTask = Task { @MainActor in
                 while !Task.isCancelled {
                     refreshWebStatus()
-                    try? await Task.sleep(for: .seconds(2))
+                    try? await Task.sleep(nanoseconds: 2_000_000_000)
                 }
             }
         }

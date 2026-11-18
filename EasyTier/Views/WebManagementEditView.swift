@@ -20,7 +20,7 @@ struct WebManagementEditView: View {
         Form {
             Section {
                 LabeledContentCompat("web_management.server.placeholder") {
-                    TextField(
+                    AdaptiveTextField(
                         "tcp://et-web.console.easytier.net:22020/your_token",
                         text: $server,
                         prompt: Text("tcp://localhost:22020/your_token"),
@@ -48,17 +48,19 @@ struct WebManagementEditView: View {
                 Text("web_management.secure_mode_help")
             }
             Section("web_management.machine_id") {
-                LabeledContent {
-                    Button(action: copyMachineID) {
-                        Image(systemName: "doc.on.doc")
+                VStack(alignment: .leading, spacing: 8) {
+                    LabeledContentCompat {
+                        Button(action: copyMachineID) {
+                            Image(systemName: "doc.on.doc")
+                        }
+                        .help("web_management.machine_id.copy")
+                    } label: {
+                        Text(machineID).font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
                     }
-                    .help("web_management.machine_id.copy")
-                } label: {
-                    Text(machineID).font(.system(.caption, design: .monospaced))
-                        .textSelection(.enabled)
-                }
-                Button("web_management.machine_id.reset", role: .destructive) {
-                    showResetMachineIDAlert = true
+                    Button("web_management.machine_id.reset", role: .destructive) {
+                        showResetMachineIDAlert = true
+                    }
                 }
             }
         }

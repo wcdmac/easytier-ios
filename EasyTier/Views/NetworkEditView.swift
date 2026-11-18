@@ -234,7 +234,7 @@ struct NetworkEditView: View {
                 )
                 if profile.enableSecureMode {
                     LabeledContentCompat("local_private_key") {
-                        TextField(
+                        AdaptiveTextField(
                             "common_text.empty",
                             text: Binding(
                                 get: { profile.secureModeLocalPrivateKey },
@@ -663,7 +663,7 @@ struct PeerPublicKeyEditor: View {
                 }
 
                 Section {
-                    TextField(
+                    AdaptiveTextField(
                         "peer_public_key",
                         text: $publicKey,
                         prompt: Text("peer_public_key"),
@@ -671,7 +671,7 @@ struct PeerPublicKeyEditor: View {
                     )
                     .labelsHidden()
                     .font(.body.monospaced())
-                    .lineLimit(2...4)
+                    .lineLimit(4)
                     .adaptiveNoTextInputAutocapitalization()
                     .autocorrectionDisabled()
 

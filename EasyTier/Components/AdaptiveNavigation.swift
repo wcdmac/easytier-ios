@@ -53,6 +53,7 @@ extension View {
         modifier(ColumnGutter(edge: edge, minimum: minimum))
     }
 
+    @available(iOS 16.0, macOS 13.0, *)
     func adaptiveNavigationDestination<Enum: Identifiable & Hashable, Destination: View>(
         item: Binding<Enum?>,
         @ViewBuilder destination: @escaping () -> Destination
