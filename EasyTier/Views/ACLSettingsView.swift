@@ -446,7 +446,7 @@ private struct ACLStringListEditor: View {
                         .labelsHidden()
                         .font(.body.monospaced())
                         .adaptiveNoTextInputAutocapitalization()
-                        .autocorrectionDisabled()
+                        .disableAutocorrection(true)
                     Button(role: .destructive) {
                         guard values.indices.contains(index) else { return }
                         values.remove(at: index)
@@ -711,7 +711,7 @@ private struct ACLGroupIdentityEditorView: View {
                         .labelsHidden()
                         .multilineTextAlignment(.trailing)
                         .adaptiveNoTextInputAutocapitalization()
-                        .autocorrectionDisabled()
+                        .disableAutocorrection(true)
                 }
                 LabeledContentCompat("acl.group_secret") {
                     SecureField(

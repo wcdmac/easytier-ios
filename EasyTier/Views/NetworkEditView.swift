@@ -246,7 +246,7 @@ struct NetworkEditView: View {
                         .labelsHidden()
                         .font(.body.monospaced())
                         .adaptiveNoTextInputAutocapitalization()
-                        .autocorrectionDisabled()
+                        .disableAutocorrection(true)
                     }
                     LabeledContentCompat("local_public_key") {
                         Group {
@@ -673,7 +673,7 @@ struct PeerPublicKeyEditor: View {
                     .font(.body.monospaced())
                     .lineLimit(4)
                     .adaptiveNoTextInputAutocapitalization()
-                    .autocorrectionDisabled()
+                    .disableAutocorrection(true)
 
                     if let validationError {
                         Label(validationError, systemImage: "exclamationmark.triangle.fill")

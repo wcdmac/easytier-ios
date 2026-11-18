@@ -29,7 +29,7 @@ struct WebManagementEditView: View {
                     .labelsHidden()
                     .multilineTextAlignment(.trailing)
                     .adaptiveNoTextInputAutocapitalization()
-                    .autocorrectionDisabled()
+                    .disableAutocorrection(true)
                 }
                 LabeledContentCompat("hostname") {
                     TextField(
