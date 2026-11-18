@@ -43,36 +43,36 @@ struct MenuBarView<Manager: NetworkExtensionManagerProtocol>: View {
 
     private var statusText: String {
         if manager.isLoading {
-            return String(localized: "menubar.status.loading")
+            return localizedString( "menubar.status.loading")
         }
 
         switch manager.status {
         case .invalid:
-            return String(localized: "menubar.status.not_configured")
+            return localizedString( "menubar.status.not_configured")
         case .disconnected:
-            return String(localized: "menubar.status.disconnected")
+            return localizedString( "menubar.status.disconnected")
         case .connecting:
-            return String(localized: "menubar.status.connecting")
+            return localizedString( "menubar.status.connecting")
         case .connected:
-            return String(localized: "menubar.status.connected")
+            return localizedString( "menubar.status.connected")
         case .reasserting:
-            return String(localized: "menubar.status.reconnecting")
+            return localizedString( "menubar.status.reconnecting")
         case .disconnecting:
-            return String(localized: "menubar.status.disconnecting")
+            return localizedString( "menubar.status.disconnecting")
         @unknown default:
-            return String(localized: "menubar.status.unknown")
+            return localizedString( "menubar.status.unknown")
         }
     }
 
     private var networkName: String {
         if connectionMode == EasyTierConnectionMode.web.rawValue {
-            return webStatus?.networkName ?? webStatus?.instanceName ?? String(localized: "web_management.title")
+            return webStatus?.networkName ?? webStatus?.instanceName ?? localizedString( "web_management.title")
         }
         return selectedProfileName ?? "EasyTier"
     }
 
     private var virtualIPv4: String {
-        status?.myNodeInfo?.virtualIPv4?.description ?? String(localized: "not_available")
+        status?.myNodeInfo?.virtualIPv4?.description ?? localizedString( "not_available")
     }
 
     private var peerCount: String {
@@ -146,12 +146,12 @@ struct MenuBarView<Manager: NetworkExtensionManagerProtocol>: View {
 
                 HStack(spacing: 12) {
                     compactStat(
-                        title: String(localized: "virtual_ipv4"),
+                        title: localizedString( "virtual_ipv4"),
                         value: virtualIPv4,
                         systemImage: "network"
                     )
                     compactStat(
-                        title: String(localized: "peer_info"),
+                        title: localizedString( "peer_info"),
                         value: peerCount,
                         systemImage: "person.2"
                     )
@@ -182,7 +182,7 @@ struct MenuBarView<Manager: NetworkExtensionManagerProtocol>: View {
                 Image(systemName: "macwindow")
             }
             .buttonStyle(.bordered)
-            .help(String(localized: "menubar.open"))
+            .help(localizedString( "menubar.open"))
             .keyboardShortcut("o")
 
             Button {
@@ -191,7 +191,7 @@ struct MenuBarView<Manager: NetworkExtensionManagerProtocol>: View {
                 Image(systemName: "power")
             }
             .buttonStyle(.bordered)
-            .help(String(localized: "menubar.quit"))
+            .help(localizedString( "menubar.quit"))
             .keyboardShortcut("q")
         }
         .padding(12)

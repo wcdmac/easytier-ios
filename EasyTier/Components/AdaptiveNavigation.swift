@@ -18,19 +18,33 @@ struct AdaptiveNavigation<PrimaryView, SecondaryView, Enum>: View where PrimaryV
     
     var body: some View {
         Group {
-            if sizeClass == .regular {
-                HStack(spacing: 0) {
-                    primaryColumn
-                        .columnGutter(.trailing)
-                        .frame(maxWidth: columnMaxWidth)
-                    secondaryColumn
-                        .columnGutter(.leading)
+            if #available(iOS 16.0, macOS 13.0, *) {
+                Group {
+                    if sizeClass == .regular {
+                        HStack(spacing: 0) {
+                            primaryColumn
+                                .columnGutter(.trailing)
+                                .frame(maxWidth: columnMaxWidth)
+                            secondaryColumn
+                                .columnGutter(.leading)
+                        }
+                    } else {
+                        primaryColumn
+                    }
                 }
+                .adaptiveNavigationDestination(item: (sizeClass == .compact ? $showNav : .constant(nil)), destination: { secondaryColumn })
             } else {
+                // iOS 15 fallback: no navigationDestination API. Present the
+                // secondary column as a sheet driven by the selected item.
                 primaryColumn
+                    .sheet(item: (sizeClass == .compact ? $showNav : .constant(nil))) { _ in
+                        NavigationView {
+                            secondaryColumn
+                        }
+                        .navigationViewStyle(.stack)
+                    }
             }
         }
-        .adaptiveNavigationDestination(item: (sizeClass == .compact ? $showNav : .constant(nil)), destination: { secondaryColumn })
     }
 }
 

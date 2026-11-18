@@ -56,7 +56,7 @@ private struct ProfileTextEditor: View {
     }
 
     var body: some View {
-        NavigationStack {
+        AdaptiveNavigationStack {
             VStack(spacing: 0) {
                 TextEditor(text: $text)
                     .font(.system(.body, design: .monospaced))
@@ -200,20 +200,20 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
     @ViewBuilder
     var webManagementView: some View {
         if isConnected, webStatus?.status == .running {
-            StatusView(webStatus?.networkName ?? webStatus?.instanceName ?? String(localized: "web_management.title"), manager: manager)
+            StatusView(webStatus?.networkName ?? webStatus?.instanceName ?? localizedString( "web_management.title"), manager: manager)
         } else if isConnected {
             Form {
                 Section("web_management.title") {
-                    LabeledContent("web_management.status.label", value: webStatusLabel)
+                    LabeledContentCompat("web_management.status.label", value: webStatusLabel)
                     if let instanceName = webStatus?.instanceName, !instanceName.isEmpty {
-                        LabeledContent("web_management.instance", value: instanceName)
+                        LabeledContentCompat("web_management.instance", value: instanceName)
                     }
                     if let error = webStatus?.error, !error.isEmpty {
                         Text(error).foregroundStyle(.red)
                     }
                 }
             }
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
         } else {
             WebManagementEditView(
                 server: $webServer,
@@ -228,12 +228,12 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
 
     var webStatusLabel: String {
         switch webStatus?.status {
-        case .connectingServer: return String(localized: "web_management.status.connecting_server")
-        case .idle, .waitingConfig: return String(localized: "web_management.status.waiting_config")
-        case .starting: return String(localized: "menubar.status.connecting")
-        case .running: return String(localized: "running")
-        case .error: return String(localized: "common.error")
-        case nil: return String(localized: "web_management.status.connecting_server")
+        case .connectingServer: return localizedString( "web_management.status.connecting_server")
+        case .idle, .waitingConfig: return localizedString( "web_management.status.waiting_config")
+        case .starting: return localizedString( "menubar.status.connecting")
+        case .running: return localizedString( "running")
+        case .error: return localizedString( "common.error")
+        case nil: return localizedString( "web_management.status.connecting_server")
         }
     }
 
@@ -283,7 +283,7 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
     }
 
     func createProfile() {
-        let baseName = newNetworkInput.isEmpty ? String(localized: "new_network") : newNetworkInput
+        let baseName = newNetworkInput.isEmpty ? localizedString( "new_network") : newNetworkInput
         guard let sanitizedName = availableConfigName(baseName) else { return }
         let profile = NetworkProfile()
         Task { @MainActor in
@@ -298,7 +298,7 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
     }
 
     var manageSheet: some View {
-        NavigationStack {
+        AdaptiveNavigationStack {
             Form {
                 Section("web_management.connection_mode") {
                     Picker("web_management.connection_mode", selection: connectionModeBinding) {
@@ -449,7 +449,7 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
 #endif
                 }
             }
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
             .navigationTitle("device.management")
             .adaptiveNavigationBarTitleInline()
             .toolbar {
@@ -486,9 +486,9 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
     }
 
     var body: some View {
-        NavigationStack {
+        AdaptiveNavigationStack {
             mainView
-                .navigationTitle(connectionMode == .web ? String(localized: "web_management.title") : (selectedSession.session?.name ?? String(localized: "select_network")))
+                .navigationTitle(connectionMode == .web ? localizedString( "web_management.title") : (selectedSession.session?.name ?? localizedString( "select_network")))
             .toolbar {
                 ToolbarItem(placement: ToolbarLeading) {
                     Button("select_network", systemImage: "chevron.up.chevron.down") {
@@ -698,7 +698,7 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
 
     private func exportSelectedProfile() {
         guard let session = selectedSession.session else {
-            errorMessage = .init(String(localized: "no_network_selected"))
+            errorMessage = .init(localizedString( "no_network_selected"))
             return
         }
         let fileURL = try? ProfileStore.fileURL(forConfigName: session.name)
@@ -722,7 +722,7 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
     private func presentEditInText() {
         Task { @MainActor in
             guard hasSelectedProfile else {
-                errorMessage = .init(String(localized: "no_network_selected"))
+                errorMessage = .init(localizedString( "no_network_selected"))
                 return
             }
             do {
@@ -871,22 +871,22 @@ struct DashboardView<Manager: NetworkExtensionManagerProtocol>: View {
 
     private func conflictDetailsText(for configName: String) -> String {
         guard let url = try? ProfileStore.fileURL(forConfigName: configName) else {
-            return String(localized: "icloud_conflict_message")
+            return localizedString( "icloud_conflict_message")
         }
         let infos = ProfileStore.conflictInfos(at: url)
         guard !infos.isEmpty else {
-            return String(localized: "icloud_conflict_message")
+            return localizedString( "icloud_conflict_message")
         }
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         let lines = infos.map { info in
-            let label = info.local ? String(localized: "local") : String(localized: "icloud")
+            let label = info.local ? localizedString( "local") : localizedString( "icloud")
             let time = info.modificationDate.map { formatter.string(from: $0) } ?? "-"
             let device = info.deviceName ?? "N/A"
             return "\(label): \(device) · \(time)"
         }
-        return ([String(localized: "icloud_conflict_message")] + lines).joined(separator: "\n")
+        return ([localizedString( "icloud_conflict_message")] + lines).joined(separator: "\n")
     }
 
     @MainActor

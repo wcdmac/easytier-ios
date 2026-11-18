@@ -1,0 +1,155 @@
+name: Build iOS 15 unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - ios15
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios15-unsigned
+  cancel-in-progress: true
+
+env:
+  SCHEME: EasyTier
+  BUILD_CONFIGURATION: Release
+  IPA_NAME: EasyTier-iOS15-unsigned.ipa
+
+jobs:
+  build:
+    name: Build unsigned IPA on GitHub-hosted macOS
+    # macOS 27 hosted image: Xcode 27.2 + Rust 1.99 preinstalled.
+    # Xcode 27 SDK is required because the source uses @available(iOS 27.1).
+    runs-on: macos-27
+    timeout-minutes: 120
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode and install build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "ARCHIVE_PATH=${RUNNER_TEMP}/EasyTier.xcarchive" >> "${GITHUB_ENV}"
+          echo "PACKAGE_PATH=${RUNNER_TEMP}/package" >> "${GITHUB_ENV}"
+          echo "EXPORT_PATH=${RUNNER_TEMP}/export" >> "${GITHUB_ENV}"
+
+          sudo xcode-select --switch /Applications/Xcode_27.2.app/Contents/Developer
+          xcodebuild -version
+
+          rustup target add aarch64-apple-ios
+          if ! command -v protoc >/dev/null 2>&1; then
+            brew install protobuf
+          fi
+
+          rustc --version
+          protoc --version
+
+      - name: Archive unsigned Release build (deployment target iOS 15)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          xcodebuild archive \
+            -project EasyTier.xcodeproj \
+            -scheme "${SCHEME}" \
+            -configuration "${BUILD_CONFIGURATION}" \
+            -destination "generic/platform=iOS" \
+            -archivePath "${ARCHIVE_PATH}" \
+            IPHONEOS_DEPLOYMENT_TARGET=15.0 \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            AD_HOC_CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CURRENT_PROJECT_VERSION="${GITHUB_RUN_NUMBER}"
+
+      - name: Package unsigned IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APP_PATH="${ARCHIVE_PATH}/Products/Applications/EasyTier.app"
+          test -d "${APP_PATH}" || { echo "App not found at ${APP_PATH}"; exit 1; }
+
+          # Confirm no code signature is present (fail loudly if signing slipped in).
+          if codesign -d "${APP_PATH}" >/dev/null 2>&1; then
+            echo "ERROR: app is unexpectedly code-signed; expected unsigned build."
+            exit 1
+          fi
+
+          mkdir -p "${PACKAGE_PATH}/Payload" "${EXPORT_PATH}"
+          cp -R "${APP_PATH}" "${PACKAGE_PATH}/Payload/EasyTier.app"
+
+          (
+            cd "${PACKAGE_PATH}"
+            /usr/bin/zip -qry "${EXPORT_PATH}/${IPA_NAME}" Payload
+          )
+
+          shasum -a 256 "${EXPORT_PATH}/${IPA_NAME}" | tee "${EXPORT_PATH}/${IPA_NAME}.sha256"
+          ls -lh "${EXPORT_PATH}"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyTier-iOS15-unsigned
+          path: |
+            ${{ runner.temp }}/export/EasyTier-iOS15-unsigned.ipa
+            ${{ runner.temp }}/export/EasyTier-iOS15-unsigned.ipa.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Create or update rolling unsigned release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BUILD_TIME="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          RELEASE_NOTES="${RUNNER_TEMP}/unsigned-release-notes.md"
+
+          {
+            echo "Unsigned EasyTier IPA, deployment target iOS 15.0."
+            echo
+            echo "- Build configuration: \`${BUILD_CONFIGURATION}\`"
+            echo "- Code signing: **none** (\`CODE_SIGNING_ALLOWED=NO\`)"
+            echo "- Deployment target: \`iOS 15.0\`"
+            echo "- Commit: [\`${SHORT_SHA}\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})"
+            echo "- Built: ${BUILD_TIME}"
+            echo "- Workflow run: [#${GITHUB_RUN_NUMBER}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            echo
+            echo "> Unsigned IPA cannot be installed on a stock iOS device directly. It requires sideloading tools (e.g. TrollStore, AltStore) or re-signing with a signing certificate."
+          } > "${RELEASE_NOTES}"
+
+          git tag --force ios15-unsigned "${GITHUB_SHA}"
+          git push --force origin refs/tags/ios15-unsigned
+
+          if gh release view ios15-unsigned >/dev/null 2>&1; then
+            gh release edit ios15-unsigned \
+              --target "${GITHUB_SHA}" \
+              --title "EasyTier iOS 15 (unsigned)" \
+              --notes-file "${RELEASE_NOTES}" \
+              --prerelease \
+              --latest=false
+            gh release upload ios15-unsigned \
+              "${EXPORT_PATH}/${IPA_NAME}" \
+              "${EXPORT_PATH}/${IPA_NAME}.sha256" \
+              --clobber
+          else
+            gh release create ios15-unsigned \
+              "${EXPORT_PATH}/${IPA_NAME}" \
+              "${EXPORT_PATH}/${IPA_NAME}.sha256" \
+              --verify-tag \
+              --target "${GITHUB_SHA}" \
+              --title "EasyTier iOS 15 (unsigned)" \
+              --notes-file "${RELEASE_NOTES}" \
+              --prerelease \
+              --latest=false
+          fi

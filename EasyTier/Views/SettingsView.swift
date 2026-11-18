@@ -55,31 +55,31 @@ struct SettingsView<Manager: NetworkExtensionManagerProtocol>: View {
     }
 
     var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? String(localized: "not_available")
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? String(localized: "not_available")
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? localizedString( "not_available")
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? localizedString( "not_available")
         return "\(version) (\(build))"
     }
 
     var body: some View {
-        NavigationStack {
+        AdaptiveNavigationStack {
             AdaptiveNavigation(primaryColumn, secondaryColumn, showNav: $selectedPane)
                 .navigationTitle("settings")
                 .adaptiveNavigationBarTitleInline()
-                .scrollDismissesKeyboard(.immediately)
+                .adaptiveScrollDismissesKeyboard()
         }
     }
     
     var primaryColumn: some View {
         Group {
 #if os(iOS)
-            List(selection: $selectedPane) {
+            List {
                 settingsContent
             }
 #else
             Form {
                 settingsContent
             }
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
 #endif
         }
         .alert(item: $settingsErrorMessage) { msg in
@@ -108,7 +108,7 @@ struct SettingsView<Manager: NetworkExtensionManagerProtocol>: View {
             Alert(
                 title: Text("profile_storage_conflict_title"),
                 message: Text(
-                    "\(conflict.fileName)\n\n\(String(localized: "profile_storage_conflict_message"))"
+                    "\(conflict.fileName)\n\n\(localizedString( "profile_storage_conflict_message"))"
                 ),
                 primaryButton: .destructive(Text("profile_storage_conflict_overwrite")) {
                     resolveProfileMigrationConflict(overwrite: true)
@@ -150,7 +150,7 @@ struct SettingsView<Manager: NetworkExtensionManagerProtocol>: View {
     var settingsContent: some View {
         Group {
             Section("general") {
-                LabeledContent("status_refresh_rate") {
+                LabeledContentCompat("status_refresh_rate") {
                     HStack {
                         TextField(
                             "1.0",
@@ -185,7 +185,7 @@ struct SettingsView<Manager: NetworkExtensionManagerProtocol>: View {
                     }
                 }
                 .disabled(manager.status != .disconnected)
-                LabeledContent("log_preserved_lines") {
+                LabeledContentCompat("log_preserved_lines") {
                     TextField(
                         "1000",
                         value: $logPreservedLines,
@@ -244,17 +244,17 @@ struct SettingsView<Manager: NetworkExtensionManagerProtocol>: View {
 #endif
 
             Section("about.title") {
-                LabeledContent("app") {
+                LabeledContentCompat("app") {
                     Text("EasyTier")
                 }
-                LabeledContent("version") {
+                LabeledContentCompat("version") {
                     Text(appVersion)
                 }
                 Link("about.homepage", destination: URL(string: "https://github.com/EasyTier/EasyTier-iOS")!)
                 Link("about.privacy_policy", destination: URL(string: "https://easytier.cn/guide/privacy.html")!)
                 
 #if os(iOS)
-                NavigationLink("about.license", value: SettingsPane.license)
+                Button("about.license") { selectedPane = .license }
 #else
                 NavigationLink("about.license") {
                     openSourceLicenseView
@@ -385,7 +385,7 @@ struct SettingsView<Manager: NetworkExtensionManagerProtocol>: View {
                 }
             } catch {
                 await MainActor.run {
-                    settingsErrorMessage = .init(String(localized: "export_failed"))
+                    settingsErrorMessage = .init(localizedString( "export_failed"))
                 }
             }
             await MainActor.run {
@@ -531,7 +531,7 @@ struct SettingsView<Manager: NetworkExtensionManagerProtocol>: View {
             } catch {
                 await MainActor.run {
                     manager.isAlwaysOnEnabled = !enabled
-                    settingsErrorMessage = .init(String(localized: "always_on_failed"))
+                    settingsErrorMessage = .init(localizedString( "always_on_failed"))
                 }
             }
             await MainActor.run {

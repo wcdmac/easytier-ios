@@ -9,6 +9,27 @@ import SwiftUI
 #endif
 
 extension View {
+    /// `.formStyle` is iOS 16+. On iOS 15 `Form` is already grouped by default,
+    /// so no-op is the correct fallback.
+    @ViewBuilder
+    func adaptiveGroupedFormStyle() -> some View {
+        if #available(iOS 16.0, macOS 13.0, *) {
+            self.formStyle(.grouped)
+        } else {
+            self
+        }
+    }
+
+    /// `.scrollDismissesKeyboard` is iOS 16+. Fall back to no-op on iOS 15.
+    @ViewBuilder
+    func adaptiveScrollDismissesKeyboard() -> some View {
+        if #available(iOS 16.0, macOS 13.0, *) {
+            self.scrollDismissesKeyboard(.immediately)
+        } else {
+            self
+        }
+    }
+
     func decimalKeyboardType() -> some View {
 #if os(iOS)
         return self.keyboardType(.decimalPad)

@@ -7,7 +7,7 @@ struct NetworkSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
+        AdaptiveNavigationStack {
             Form {
                 if let settings {
                     if let ipv4 = settings.ipv4 {
@@ -64,7 +64,7 @@ struct NetworkSettingsSheet: View {
 
                     if let mtu = settings.mtu {
                         Section("mtu") {
-                            LabeledContent("mtu", value: String(mtu))
+                            LabeledContentCompat("mtu", value: String(mtu))
                         }
                     }
                 } else {
@@ -77,7 +77,7 @@ struct NetworkSettingsSheet: View {
             .textSelection(.enabled)
             .navigationTitle("network_settings")
             .adaptiveNavigationBarTitleInline()
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
@@ -91,8 +91,8 @@ struct NetworkSettingsSheet: View {
     }
 
     private func labeledLines(_ label: LocalizedStringKey, values: [String]) -> some View {
-        LabeledContent(label) {
-            Text(values.isEmpty ? String(localized: "not_available") : values.joined(separator: "\n"))
+        LabeledContentCompat(label) {
+            Text(values.isEmpty ? localizedString( "not_available") : values.joined(separator: "\n"))
         }
     }
 
@@ -115,7 +115,7 @@ struct NetworkSettingsSheet: View {
 
     private func formatMatchDomains(_ domains: [String]) -> [String] {
         domains.map { domain in
-            domain.isEmpty ? String(localized: "all_domains") : domain
+            domain.isEmpty ? localizedString( "all_domains") : domain
         }
     }
 
@@ -163,41 +163,41 @@ struct PeerConnDetailSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
+        AdaptiveNavigationStack {
             Form {
                 if let pair {
                     Section("peer") {
-                        LabeledContent("hostname", value: pair.route.hostname)
-                        LabeledContent("peer_id", value: String(pair.route.peerId))
+                        LabeledContentCompat("hostname", value: pair.route.hostname)
+                        LabeledContentCompat("peer_id", value: String(pair.route.peerId))
                         if let ipv4 = pair.route.ipv4Addr {
-                            LabeledContent("ipv4_addr", value: ipv4.description)
+                            LabeledContentCompat("ipv4_addr", value: ipv4.description)
                         }
                         if let ipv6 = pair.route.ipv6Addr {
-                            LabeledContent("ipv6_addr", value: ipv6.description)
+                            LabeledContentCompat("ipv6_addr", value: ipv6.description)
                         }
-                        LabeledContent("inst_id", value: String(pair.route.instId))
-                        LabeledContent("version", value: String(pair.route.version))
-                        LabeledContent("next_hop_peer_id", value: String(pair.route.nextHopPeerId))
-                        LabeledContent("cost", value: String(pair.route.cost))
-                        LabeledContent("path_latency", value: latencyValueString(pair.route.pathLatency))
+                        LabeledContentCompat("inst_id", value: String(pair.route.instId))
+                        LabeledContentCompat("version", value: String(pair.route.version))
+                        LabeledContentCompat("next_hop_peer_id", value: String(pair.route.nextHopPeerId))
+                        LabeledContentCompat("cost", value: String(pair.route.cost))
+                        LabeledContentCompat("path_latency", value: latencyValueString(pair.route.pathLatency))
                         if let nextHopLatencyFirst = pair.route.nextHopPeerIdLatencyFirst {
-                            LabeledContent("next_hop_peer_id_latency_first", value: String(nextHopLatencyFirst))
+                            LabeledContentCompat("next_hop_peer_id_latency_first", value: String(nextHopLatencyFirst))
                         }
                         if let costLatencyFirst = pair.route.costLatencyFirst {
-                            LabeledContent("cost_latency_first", value: String(costLatencyFirst))
+                            LabeledContentCompat("cost_latency_first", value: String(costLatencyFirst))
                         }
                         if let pathLatencyLatencyFirst = pair.route.pathLatencyLatencyFirst {
-                            LabeledContent("path_latency_latency_first", value: latencyValueString(pathLatencyLatencyFirst))
+                            LabeledContentCompat("path_latency_latency_first", value: latencyValueString(pathLatencyLatencyFirst))
                         }
                         if let featureFlags = pair.route.featureFlag {
-                            LabeledContent("feature_flag", value: featureFlagString(featureFlags))
+                            LabeledContentCompat("feature_flag", value: featureFlagString(featureFlags))
                         }
                         if let peerInfo = pair.peer {
                             if let defaultConnId = peerInfo.defaultConnId {
-                                LabeledContent("default_conn_id", value: uuidString(defaultConnId))
+                                LabeledContentCompat("default_conn_id", value: uuidString(defaultConnId))
                             }
                             if !peerInfo.directlyConnectedConns.isEmpty {
-                                LabeledContent(
+                                LabeledContentCompat(
                                     "directly_connected_conns",
                                     value: peerInfo.directlyConnectedConns.map(uuidString).sorted().joined(separator: "\n")
                                 )
@@ -221,29 +221,29 @@ struct PeerConnDetailSheet: View {
                     } else {
                         ForEach(conns, id: \.connId) { conn in
                             Section("connection_\(conn.connId)") {
-                                LabeledContent("peer_id", value: String(conn.peerId))
-                                LabeledContent("role", value: conn.isClient ? "Client" : "Server")
-                                LabeledContent("loss_rate", value: percentString(conn.lossRate))
-                                LabeledContent("closed", value: triState(conn.isClosed))
+                                LabeledContentCompat("peer_id", value: String(conn.peerId))
+                                LabeledContentCompat("role", value: conn.isClient ? "Client" : "Server")
+                                LabeledContentCompat("loss_rate", value: percentString(conn.lossRate))
+                                LabeledContentCompat("closed", value: triState(conn.isClosed))
 
-                                LabeledContent("features", value: conn.features.isEmpty ? "None" : conn.features.joined(separator: ", "))
+                                LabeledContentCompat("features", value: conn.features.isEmpty ? "None" : conn.features.joined(separator: ", "))
 
                                 if let tunnel = conn.tunnel {
-                                    LabeledContent("tunnel_type", value: tunnel.tunnelType.uppercased())
+                                    LabeledContentCompat("tunnel_type", value: tunnel.tunnelType.uppercased())
                                     if let localAddr = tunnel.localAddr {
-                                        LabeledContent("local_addr", value: localAddr.url)
+                                        LabeledContentCompat("local_addr", value: localAddr.url)
                                     }
                                     if let remoteAddr = tunnel.remoteAddr {
-                                        LabeledContent("remote_addr", value: remoteAddr.url)
+                                        LabeledContentCompat("remote_addr", value: remoteAddr.url)
                                     }
                                 }
 
                                 if let stats = conn.stats {
-                                    LabeledContent("rx_bytes", value: formatBytes(stats.rxBytes))
-                                    LabeledContent("tx_bytes", value: formatBytes(stats.txBytes))
-                                    LabeledContent("rx_packets", value: String(stats.rxPackets))
-                                    LabeledContent("tx_packets", value: String(stats.txPackets))
-                                    LabeledContent("latency", value: latencyString(stats.latencyUs))
+                                    LabeledContentCompat("rx_bytes", value: formatBytes(stats.rxBytes))
+                                    LabeledContentCompat("tx_bytes", value: formatBytes(stats.txBytes))
+                                    LabeledContentCompat("rx_packets", value: String(stats.rxPackets))
+                                    LabeledContentCompat("tx_packets", value: String(stats.txPackets))
+                                    LabeledContentCompat("latency", value: latencyString(stats.latencyUs))
                                 }
                             }
                         }
@@ -258,7 +258,7 @@ struct PeerConnDetailSheet: View {
             .textSelection(.enabled)
             .navigationTitle("peer_details")
             .adaptiveNavigationBarTitleInline()
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
@@ -318,17 +318,17 @@ struct NodeInfoSheet: View {
     }
     
     var body: some View {
-        NavigationStack {
+        AdaptiveNavigationStack {
             Form {
                 if let nodeInfo {
                     Section("general") {
-                        LabeledContent("hostname", value: nodeInfo.hostname)
+                        LabeledContentCompat("hostname", value: nodeInfo.hostname)
                         if let peerID = nodeInfo.peerID {
-                            LabeledContent("peer_id", value: String(peerID))
+                            LabeledContentCompat("peer_id", value: String(peerID))
                         }
-                        LabeledContent("version", value: nodeInfo.version)
+                        LabeledContentCompat("version", value: nodeInfo.version)
                         if let virtualIPv4 = nodeInfo.virtualIPv4 {
-                            LabeledContent("virtual_ipv4", value: virtualIPv4.description)
+                            LabeledContentCompat("virtual_ipv4", value: virtualIPv4.description)
                         }
                     }
                 } else {
@@ -340,7 +340,7 @@ struct NodeInfoSheet: View {
             .textSelection(.enabled)
             .navigationTitle("node_information")
             .adaptiveNavigationBarTitleInline()
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
@@ -363,12 +363,12 @@ struct IPInfoSheet: View {
     }
     
     var body: some View {
-        NavigationStack {
+        AdaptiveNavigationStack {
             Form {
                 if let nodeInfo {
                     if let virtualIPv4 = nodeInfo.virtualIPv4 {
                         Section("general") {
-                            LabeledContent("virtual_ipv4", value: virtualIPv4.description)
+                            LabeledContentCompat("virtual_ipv4", value: virtualIPv4.description)
                         }
                     }
                     
@@ -376,10 +376,10 @@ struct IPInfoSheet: View {
                         if ips.publicIPv4 != nil || ips.publicIPv6 != nil {
                             Section("ip_information") {
                                 if let publicIPv4 = ips.publicIPv4 {
-                                    LabeledContent("public_ipv4", value: publicIPv4.description)
+                                    LabeledContentCompat("public_ipv4", value: publicIPv4.description)
                                 }
                                 if let publicIPv6 = ips.publicIPv6 {
-                                    LabeledContent("public_ipv6", value: publicIPv6.description)
+                                    LabeledContentCompat("public_ipv6", value: publicIPv6.description)
                                 }
                             }
                         }
@@ -415,7 +415,7 @@ struct IPInfoSheet: View {
             .textSelection(.enabled)
             .navigationTitle("ip_information")
             .adaptiveNavigationBarTitleInline()
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
@@ -438,25 +438,25 @@ struct StunInfoSheet: View {
     }
     
     var body: some View {
-        NavigationStack {
+        AdaptiveNavigationStack {
             Form {
                 if let stunInfo {
                     Section("nat_types") {
-                        LabeledContent("udp_nat_type") {
+                        LabeledContentCompat("udp_nat_type") {
                             Text(stunInfo.udpNATType.description)
                         }
-                        LabeledContent("tcp_nat_type") {
+                        LabeledContentCompat("tcp_nat_type") {
                             Text(stunInfo.tcpNATType.description)
                         }
                     }
                     
                     Section("details") {
-                        LabeledContent("last_update", value: formatDate(stunInfo.lastUpdateTime))
+                        LabeledContentCompat("last_update", value: formatDate(stunInfo.lastUpdateTime))
                         if let minPort = stunInfo.minPort {
-                            LabeledContent("min_port", value: String(minPort))
+                            LabeledContentCompat("min_port", value: String(minPort))
                         }
                         if let maxPort = stunInfo.maxPort {
-                            LabeledContent("max_port", value: String(maxPort))
+                            LabeledContentCompat("max_port", value: String(maxPort))
                         }
                     }
                     
@@ -477,7 +477,7 @@ struct StunInfoSheet: View {
             .navigationTitle("stun_information")
             .adaptiveNavigationBarTitleInline()
             .textSelection(.enabled)
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {

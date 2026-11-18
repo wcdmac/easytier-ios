@@ -19,7 +19,7 @@ struct WebManagementEditView: View {
     var body: some View {
         Form {
             Section {
-                LabeledContent("web_management.server.placeholder") {
+                LabeledContentCompat("web_management.server.placeholder") {
                     TextField(
                         "tcp://et-web.console.easytier.net:22020/your_token",
                         text: $server,
@@ -31,7 +31,7 @@ struct WebManagementEditView: View {
                     .adaptiveNoTextInputAutocapitalization()
                     .autocorrectionDisabled()
                 }
-                LabeledContent("hostname") {
+                LabeledContentCompat("hostname") {
                     TextField(
                         "common_text.default",
                         text: $hostname,
@@ -62,7 +62,7 @@ struct WebManagementEditView: View {
                 }
             }
         }
-        .formStyle(.grouped)
+        .adaptiveGroupedFormStyle()
         .alert("web_management.machine_id.reset_confirm_title", isPresented: $showResetMachineIDAlert) {
             Button("common.cancel", role: .cancel) {}
             Button("reset", role: .destructive) {

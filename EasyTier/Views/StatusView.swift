@@ -142,7 +142,7 @@ struct StatusView<Manager: NetworkExtensionManagerProtocol>: View {
             info
 #endif
         }
-        .formStyle(.grouped)
+        .adaptiveGroupedFormStyle()
     }
     
     var doubleComlum: some View {
@@ -166,7 +166,7 @@ struct StatusView<Manager: NetworkExtensionManagerProtocol>: View {
                     peerInfo
                 }
             }
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
             .columnGutter(.trailing)
             .frame(minWidth: columnMinWidth, maxWidth: columnMaxWidth)
             Form {
@@ -174,7 +174,7 @@ struct StatusView<Manager: NetworkExtensionManagerProtocol>: View {
                     TimelineLogPanel(events: status?.events ?? [])
                 }
             }
-            .formStyle(.grouped)
+            .adaptiveGroupedFormStyle()
             .columnGutter(.leading)
             .frame(minWidth: columnMinWidth)
         }
@@ -195,7 +195,7 @@ struct StatusView<Manager: NetworkExtensionManagerProtocol>: View {
                         Text(networkName)
                             .font(.title2)
                             .fontWeight(.bold)
-                        Text(status?.myNodeInfo?.version ?? String(localized: "not_available"))
+                        Text(status?.myNodeInfo?.version ?? localizedString( "not_available"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

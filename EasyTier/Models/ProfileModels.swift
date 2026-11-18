@@ -11,13 +11,13 @@ enum SecureModeKeyError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidPrivateKey:
-            String(localized: "secure_mode_error.invalid_private_key")
+            localizedString( "secure_mode_error.invalid_private_key")
         case .invalidPublicKey:
-            String(localized: "secure_mode_error.invalid_public_key")
+            localizedString( "secure_mode_error.invalid_public_key")
         case .publicKeyWithoutPrivateKey:
-            String(localized: "secure_mode_error.public_key_without_private_key")
+            localizedString( "secure_mode_error.public_key_without_private_key")
         case .publicKeyMismatch:
-            String(localized: "secure_mode_error.public_key_mismatch")
+            localizedString( "secure_mode_error.public_key_mismatch")
         }
     }
 }
@@ -28,9 +28,9 @@ enum PeerPublicKeyError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalid(let peerURI):
-            let peer = peerURI.isEmpty ? String(localized: "initial_node") : peerURI
+            let peer = peerURI.isEmpty ? localizedString( "initial_node") : peerURI
             return String(
-                format: String(localized: "peer_public_key_error.invalid"),
+                format: localizedString( "peer_public_key_error.invalid"),
                 peer
             )
         }
