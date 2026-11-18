@@ -63,7 +63,6 @@ jobs:
             -configuration "${BUILD_CONFIGURATION}" \
             -destination "generic/platform=iOS" \
             -archivePath "${ARCHIVE_PATH}" \
-            IPHONEOS_DEPLOYMENT_TARGET=15.0 \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             AD_HOC_CODE_SIGNING_ALLOWED=NO \
