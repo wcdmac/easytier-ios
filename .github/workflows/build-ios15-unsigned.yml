@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: ios15-unsigned
@@ -81,6 +82,18 @@ jobs:
 
           if [ "${BUILD_STATUS}" -ne 0 ]; then
             echo "::error::xcodebuild archive failed with status ${BUILD_STATUS}"
+            ERROR_BODY="${RUNNER_TEMP}/build-error.md"
+            {
+              echo "## xcodebuild archive failed (status ${BUILD_STATUS})"
+              echo
+              echo '```'
+              grep -E "error:|warning:| \*\* ARCHIVE|\*\* BUILD|only available in iOS|cannot find|is unavailable" "${RUNNER_TEMP}/xcodebuild.log" | tail -200 || true
+              echo '```'
+            } > "${ERROR_BODY}"
+            GH_TOKEN="${{ github.token }}" gh issue create \
+              --repo "${{ github.repository }}" \
+              --title "CI build error dump (run ${{ github.run_number }})" \
+              --body-file "${ERROR_BODY}" || true
             exit "${BUILD_STATUS}"
           fi
 
