@@ -22,9 +22,9 @@ env:
 jobs:
   build:
     name: Build unsigned IPA on GitHub-hosted macOS
-    # macOS 27 hosted image: Xcode 27.2 + Rust 1.99 preinstalled.
+    # xcode-27 hosted image: macOS 27 + Xcode 27.2 + Rust 1.99 preinstalled.
     # Xcode 27 SDK is required because the source uses @available(iOS 27.1).
-    runs-on: macos-27
+    runs-on: xcode-27
     timeout-minutes: 120
 
     steps:
