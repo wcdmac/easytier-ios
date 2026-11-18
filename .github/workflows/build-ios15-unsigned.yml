@@ -54,7 +54,7 @@ jobs:
       - name: Archive unsigned Release build (deployment target iOS 15)
         shell: bash
         run: |
-          set -euo pipefail
+          set +e
 
           xcodebuild archive \
             -project EasyTier.xcodeproj \
@@ -67,7 +67,22 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             AD_HOC_CODE_SIGNING_ALLOWED=NO \
             CODE_SIGN_IDENTITY="" \
-            CURRENT_PROJECT_VERSION="${GITHUB_RUN_NUMBER}"
+            CURRENT_PROJECT_VERSION="${GITHUB_RUN_NUMBER}" 2>&1 | tee "${RUNNER_TEMP}/xcodebuild.log"
+          BUILD_STATUS=${PIPESTATUS[0]}
+
+          # Surface compiler errors into the step summary so they are readable
+          # from the public API even without a downloadable log.
+          {
+            echo "### xcodebuild archive status: ${BUILD_STATUS}"
+            echo "<pre>"
+            grep -E "error:|warning:| \*\* ARCHIVE|\*\* BUILD|only available in iOS|cannot find|is unavailable" "${RUNNER_TEMP}/xcodebuild.log" | tail -200 || true
+            echo "</pre>"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          if [ "${BUILD_STATUS}" -ne 0 ]; then
+            echo "::error::xcodebuild archive failed with status ${BUILD_STATUS}"
+            exit "${BUILD_STATUS}"
+          fi
 
       - name: Package unsigned IPA
         shell: bash
